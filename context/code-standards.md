@@ -2,6 +2,12 @@
 
 ## general
 
+- **no comments.** Not in `.ts`, `.tsx`, `.css` or config files. No JSDoc, no section
+  banners, no "why" notes. Code carries its own explanation through naming and structure
+- if a piece of code needs a comment to be understood, that is the signal to rename it
+  or split it - not to annotate it
+- reasoning, decisions and gotchas belong in `context/`, never in the source. A comment
+  is a second copy that drifts from the first the moment either changes
 - keep modules small and single-purpose
 - fix root causes - do not layer workarounds
 - do not mix unrelated concerns in one component or module

@@ -28,6 +28,8 @@ Przeczytaj `context/progress-tracker.md` — mówi, gdzie stanął projekt.
    świadomie odłożone. Decyzje podejmujemy po kolei, w trakcie budowania.
 2. **Zero obiektów i wartości zaszytych w kodzie.** Obiekty, cechy, liczby i teksty
    to dane, nie kod — nawet tymczasowo, nawet do testu.
+3. **Zero komentarzy w kodzie.** Żadnych `//`, `/* */` ani JSDoc — także w plikach
+   konfiguracyjnych. Uzasadnienia idą do `context/`, nie do źródeł.
 
 ## Commity
 

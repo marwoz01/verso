@@ -1,19 +1,7 @@
-/**
- * Recznie rysowane znaki w stylu markera. Jedyny element dekoracyjny w projekcie -
- * cala energia strony siedzi tutaj, dzieki czemu typografia moze zostac spokojna.
- *
- * Zasady:
- * - kazdy ksztalt to obrys (stroke), nigdy wypelnienie - marker rysuje linie, nie plamy
- * - sciezki sa celowo niesymetryczne; idealna elipsa czyta sie jak ksztalt z biblioteki ikon
- * - kolor dziedziczy z currentColor, wiec steruje nim klasa text-* rodzica
- * - aria-hidden: to ozdoba, czytnik ekranu nie ma tu czego ogloszic
- */
-
 type MarkProps = {
   className?: string;
 };
 
-/** Podwojne podkreslenie pod slowem - drugi pociagniecie lekko rozjezdza sie z pierwszym. */
 export function Underline({ className }: MarkProps) {
   return (
     <svg
@@ -40,7 +28,6 @@ export function Underline({ className }: MarkProps) {
   );
 }
 
-/** Strzalka w gore - znak "wiecej", najwazniejszy gest w tej grze. */
 export function ArrowUp({ className }: MarkProps) {
   return (
     <svg
@@ -66,7 +53,6 @@ export function ArrowUp({ className }: MarkProps) {
   );
 }
 
-/** Petla obrysowujaca slowo - konce zachodza na siebie, jak przy rysowaniu jednym ruchem. */
 export function Circle({ className }: MarkProps) {
   return (
     <svg
@@ -86,7 +72,6 @@ export function Circle({ className }: MarkProps) {
   );
 }
 
-/** Trzy kreski rozbiegajace sie od punktu - akcent "uwaga tutaj". */
 export function Burst({ className }: MarkProps) {
   return (
     <svg
