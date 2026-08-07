@@ -8,7 +8,7 @@
 | Styling | Tailwind CSS v4 | utility + tokeny motywu (`@theme` w `src/app/globals.css`) |
 | Animacje | GSAP 3 + `@gsap/react` | odsłona wartości, przejście karty prawa→lewo (Flip) |
 | Testy | Vitest 4 | silnik doboru par i logika rundy |
-| Fonty | **jeszcze nie wybrane** — domyślny systemowy stos Tailwinda | Geist usunięty razem z boilerplate'em |
+| Fonty | Inter Tight przez `next/font/google`, podzbiory `latin` + `latin-ext` | jeden krój na wszystko, patrz `ui-context.md` |
 | Menedżer pakietów | pnpm 10 | |
 
 To założenia startowe, nie dogmaty. Jeśli w trakcie budowy pojawi się dobry powód, żeby coś
@@ -29,9 +29,10 @@ z `layoutId`. Zysk: zero czasu na naukę drugiej biblioteki.
 ```
 src/
   app/
-    globals.css          # samo @import "tailwindcss" - tokeny motywu jeszcze nie istnieja
-    layout.tsx           # root layout
-    page.tsx             # strona zastepcza - do wymiany przy pierwszym ekranie gry
+    globals.css          # wejscie Tailwind v4 + tokeny motywu (@theme)
+    layout.tsx           # root layout, font
+    page.tsx             # strona glowna
+  components/            # komponenty prezentacyjne (graffiti.tsx)
   lib/                   # logika niezalezna od Reacta (units.ts, dalej silnik)
 context/                 # ten katalog - pliki kontekstowe projektu
 vitest.config.mts        # alias @/* dla testow

@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
-/* Tokeny motywu (kolory, typografia, jednostki osi) powstana przy pierwszym ekranie gry.
-   Patrz context/ui-context.md. Do tego czasu obowiazuja domyslne wartosci Tailwinda,
-   zeby nic nie udawalo podjetej decyzji. */
+/* Tokeny motywu. Zasada: kolor odwoluje sie do roli, nie do wygladu -
+   `ink` zamiast `black`, zeby zmiana odcienia nie wymagala przechodzenia komponentow.
+   Patrz context/ui-context.md. */
+@theme {
+  --color-paper: #ffffff;
+  --color-ink: #0b0b0b;
+  --color-ink-muted: #5c5c5c;
+
+  /* Marker: wylacznie dekoracja. Kontrast na bieli ~1,9:1, wiec NIGDY pod tekst. */
+  --color-accent: #00d26a;
+  /* Wariant tekstowy tego samego zielonego: 6,1:1 na bieli, przechodzi AA. */
+  --color-accent-ink: #00713a;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter-tight);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  /* Zaznaczenie tekstu tym samym zielonym - marker dziala takze na zaznaczeniu. */
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent-ink);
+    outline-offset: 3px;
+  }
+}

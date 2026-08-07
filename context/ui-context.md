@@ -1,60 +1,105 @@
 # UI / Design Context
 
-Kierunek wizualny. **Tokenów, palety ani typografii jeszcze nie ma** — powstaną, gdy dojdziemy
-do pierwszego ekranu. Dziś ten plik trzyma tylko to, co wynika wprost z konceptu.
+Źródło prawdy dla wyglądu. Tokeny definiujemy **raz** w `src/app/globals.css` (Tailwind v4,
+blok `@theme`) i odwołujemy się do nich wyłącznie przez nazwy utility (`bg-paper`, `text-ink`,
+`text-accent`). Zero surowych klas kolorów Tailwinda (`neutral-*`, `zinc-*`) i zero hex
+w komponentach.
 
 ## Kierunek
 
-**Mocny minimalizm.** Głównym elementem interfejsu są dwa duże porównywane obiekty:
-grafika, nazwa, jednostka i wielka liczba. Nic poza tym.
+**Minimalizm z jednym akcentem.** Biała kartka, czarna typografia, zielony marker jako jedyny
+kolor. Referencja: `artemartemartem.com` — duża, ciasno złożona typografia, bardzo dużo
+powietrza, ręczne elementy dające ciepło.
 
-Logika tego wyboru: decyzja ma zajmować kilka sekund. Każdy element, który trzeba przeczytać
-albo zinterpretować, zjada ten budżet. Interfejs, który „nic nie robi", jest tu funkcją,
-nie stylem.
+Logika podziału ról: **typografia jest spokojna, żeby marker mógł krzyczeć.** Gdyby krój też
+miał charakter, dwa głosy biłyby się o uwagę. Dlatego neutralny grotesk plus jeden mocny,
+odręczny akcent.
 
-Kiedy pojawia się pytanie „dodać jeszcze jeden element?" — odpowiedź brzmi nie.
+Przy pytaniu „dodać jeszcze jeden element?" odpowiedź brzmi nie. Ta estetyka wygrywa
+odejmowaniem.
 
-## Anatomia ekranu
+## Kolory
+
+| Rola | Token (utility) | Wartość | Kontrast na bieli |
+|---|---|---|---|
+| Tło | `bg-paper` | `#ffffff` | — |
+| Tekst główny | `text-ink` | `#0b0b0b` | 19,5:1 |
+| Tekst drugorzędny | `text-ink-muted` | `#5c5c5c` | 6,4:1 — przechodzi AA |
+| Marker (dekoracja) | `text-accent` / `border-accent` | `#00d26a` | **1,9:1 — nigdy pod tekst** |
+| Zielony tekstowy | `text-accent-ink` | `#00713a` | 6,1:1 — przechodzi AA |
+
+**Dwa zielone to nie niedopatrzenie.** `accent` jest wystarczająco jaskrawy, żeby czytać się
+jak marker, ale na bieli daje 1,9:1 — tekst w tym kolorze byłby nieczytelny. Dlatego istnieje
+`accent-ink`: ten sam zielony przyciemniony do progu AA, wyłącznie pod litery.
+
+Zaznaczenie tekstu (`::selection`) i obrys fokusa też są zielone — marker działa wszędzie.
+
+## Typografia
+
+**Inter Tight** (`next/font/google`), jeden krój na wszystko, zróżnicowany wagą i skalą.
+
+Wybrany, bo jest neutralny i ciasny: wąskie światła pozwalają złożyć wielki nagłówek bez
+rozjeżdżania się w szerokość, a brak charakteru zostawia scenę markerowi.
+
+**Podzbiory: `["latin", "latin-ext"]`.** `latin-ext` jest wymagany — bez niego polskie znaki
+diakrytyczne spadają na font zastępczy i tekst rozjeżdża się w pionie. `create-next-app` ma
+ten błąd domyślnie.
+
+| Rola | Klasy |
+|---|---|
+| Znak (wordmark) | `text-6xl sm:text-8xl font-extrabold tracking-tighter uppercase leading-[0.85]` |
+| Nagłówek | `text-3xl sm:text-5xl font-bold tracking-tight` |
+| Etykieta / meta | `text-xs sm:text-sm font-medium tracking-[0.15em] uppercase` |
+| Akapit | `text-base sm:text-lg leading-relaxed` |
+| Przycisk | `text-base font-bold tracking-wide uppercase` |
+
+Kontrast między ogromnym, ciasnym znakiem a maleńkim, rozstrzelonym tekstem meta **jest** tym
+kierunkiem, nie dodatkiem do niego.
+
+## System graffiti
+
+`src/components/graffiti.tsx` — cztery znaki: `ArrowUp`, `Underline`, `Circle`, `Burst`.
+To jedyny element dekoracyjny w całym projekcie.
+
+Reguły, bez których to przestaje wyglądać na marker:
+
+- **wyłącznie obrys (`stroke`), nigdy wypełnienie** — marker rysuje linie, nie plamy
+- **ścieżki celowo niesymetryczne**, końce zachodzą na siebie; idealna elipsa czyta się
+  jak ikona z biblioteki, nie jak ruch ręki
+- **kolor z `currentColor`** — steruje nim klasa `text-*` rodzica, więc znak działa
+  na każdym tle bez wariantów
+- **`aria-hidden="true"`** — to ozdoba, czytnik ekranu nie ma tu czego ogłaszać
+- `strokeLinecap="round"` wszędzie: marker nie ma ostrych końców
+
+Pozycjonowanie nad tekstem: rozmiar bierze się **albo** z `inset`, **albo** z `h`/`w` —
+nigdy z obu naraz, bo reguły się nadpisują.
+
+## Anatomia ekranu pojedynku
+
+`[do zaprojektowania]` — powstanie przy pierwszym ekranie gry.
 
 ```
 ┌─────────────────────┬─────────────────────┐
 │     [ grafika ]     │     [ grafika ]     │
-│                     │                     │
 │      POLSKA         │    TAYLOR SWIFT     │ ← nazwa obiektu
 │  liczba mieszkańców │ miesięczni słuchacze│ ← cecha, mała
-│                     │                     │
 │      38 mln         │        ???          │ ← liczba, dominanta
 └─────────────────────┴─────────────────────┘
               L U D Z I E                     ← jednostka, wspólna
 ```
 
-Dwie informacje, dwa miejsca — i to nie jest kosmetyka:
-
-- **jednostka jest wspólna** dla obu kart, więc stoi raz, pośrodku
-- **cecha jest różna** po każdej stronie, więc stoi przy karcie
-
-Bez obu gracz nie wie, co porównuje: „mieszkańcy" i „słuchacze" to ta sama jednostka,
-ale nie to samo pytanie.
+Jednostka jest wspólna dla obu kart, więc stoi raz, pośrodku. Cecha jest różna po każdej
+stronie, więc stoi przy karcie. Bez obu gracz nie wie, co porównuje: „mieszkańcy"
+i „słuchacze" to ta sama jednostka, ale nie to samo pytanie.
 
 **Layout:** desktop — karty obok siebie · mobile — jedna nad drugą.
 
 ## Co wynika z „kilku sekund na decyzję"
 
-Wymaganie z `project-overview.md`, przełożone na interfejs:
-
 - gracz nie powinien musieć czytać zdania, żeby zrozumieć rundę
 - liczba jest dominantą wizualną, wszystko inne jest podpisem
 - nic nie powinno wymagać przewijania ani celowania w mały element
 - przejście do kolejnej rundy nie może wymagać osobnego kliknięcia „dalej"
-
-## Odsłona wartości
-
-Moment odsłony to najmocniejsza chwila gry — tam mieszka efekt „serio?!".
-Wartość nie powinna po prostu „się pojawić".
-
-`[do zaprojektowania]` Konkretna forma animacji, czas trwania i sposób pokazania werdyktu.
-Jedyne, co już wiadomo: **werdykt nie może wyprzedzić odsłony wartości**, bo wtedy napięcie
-znika w połowie ruchu.
 
 ## Grafiki obiektów — problem do rozwiązania
 
@@ -74,7 +119,5 @@ Potrzebne będą dwa równorzędne warianty karty, nie jeden wariant plus stan a
 
 ## Jeszcze nieustalone
 
-Paleta i tokeny · typografia · sposób oznaczania jednostki (kolor? ikona? sam napis?) ·
-forma animacji odsłony · wariant karty typograficznej · stan po błędnej odpowiedzi.
-
-Ustalamy je, gdy dojdziemy do odpowiedniego ekranu — nie wcześniej.
+Sposób oznaczania jednostki na ekranie pojedynku (kolor? ikona? sam napis?) · forma animacji
+odsłony · wariant karty typograficznej · stan po błędnej odpowiedzi · favikona.

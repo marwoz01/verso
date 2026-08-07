@@ -55,6 +55,10 @@
 - `:hover` may enhance, never gate - most traffic is mobile, where hover does not exist
 - the whole card is the interaction target, not a small button inside it
 - load fonts with the `latin-ext` subset - Polish diacritics fall back without it
+- `--color-accent` is decoration only (1.9:1 on white); use `--color-accent-ink` for any text
+- decorative SVG: stroke only, `currentColor`, `aria-hidden="true"` - see `ui-context.md`
+- when absolutely positioning a mark over text, size it from `inset` **or** `h`/`w`,
+  never both - the rules overwrite each other
 
 ## content
 
@@ -92,5 +96,6 @@ docs: record stack decision in progress-tracker
 ## file organization
 
 - `src/lib/` - game logic and data, framework-free
+- `src/components/` - presentational components, composition only, no game logic
 - `src/app/` - routes, layout, styles
 - `context/` - project context files, not shipped code
