@@ -84,6 +84,8 @@
 
 ## git
 
+- **never run `git commit` or `git push`.** Propose the message in chat and stop;
+  the owner reviews and commits. Only an explicit "commit this" overrides it
 - **conventional commits, one line: `<type>: <subject>`**
 - types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `build`
 - English, imperative, lowercase after the colon, no trailing period

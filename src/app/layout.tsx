@@ -3,7 +3,7 @@ import { Inter_Tight } from "next/font/google";
 import "./globals.css";
 
 const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
+  variable: "--font-sans",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -15,10 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${interTight.variable} h-full font-sans antialiased`}
-    >
+    <html lang="en" className={`${interTight.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

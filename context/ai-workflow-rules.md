@@ -59,7 +59,21 @@ For multi-step tasks, state a brief plan:
 **Verify by observing, not by inferring.** A command exiting 0 is not evidence that it did
 its job - read back the result.
 
-## 5. Decyzje podejmujemy po kolei (project-specific)
+## 5. Review należy do właściciela (project-specific)
+
+**Nigdy nie commituj samodzielnie.** Commit i push są w rękach właściciela projektu.
+
+Po każdej zmianie, o którą prosi:
+
+1. **pokaż, co się zmieniło w kodzie** — konkretne pliki i fragmenty, nie streszczenie
+2. **wyjaśnij, jak to działa** — mechanizm, nie lista zmienionych plików
+3. **zaproponuj wiadomość commita w czacie** — zgodnie z konwencją z `code-standards.md`
+4. **zatrzymaj się.** Właściciel robi review i commituje sam
+
+Nie uruchamiaj `git commit` ani `git push`, nawet gdy zmiana jest oczywista i wszystko
+przechodzi. Jedyny wyjątek: wyraźna prośba „zacommituj".
+
+## 6. Decyzje podejmujemy po kolei (project-specific)
 
 Ten projekt jest w fazie koncepcyjnej i właściciel świadomie **nie chce rozstrzygać
 wszystkiego z góry**. Stack, architektura i źródła danych są odłożone.
@@ -71,7 +85,7 @@ wszystkiego z góry**. Stack, architektura i źródła danych są odłożone.
 - Jeśli zadanie wymaga decyzji, której nie ma — zaproponuj jedną opcję z uzasadnieniem,
   nie listę czterech wariantów do przejrzenia.
 
-## 6. Treść nie mieszka w kodzie (project-specific)
+## 7. Treść nie mieszka w kodzie (project-specific)
 
 Obiekty, ich cechy, wartości, źródła i teksty „Did you know?" to **dane**, nie kod.
 

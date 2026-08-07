@@ -1,30 +1,87 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-paper: #ffffff;
-  --color-ink: #0b0b0b;
-  --color-ink-muted: #5c5c5c;
-  --color-accent: #00d26a;
-  --color-accent-ink: #00713a;
+  --color-marker: #00d26a;
+  --color-marker-ink: #00713a;
 }
 
 @theme inline {
-  --font-sans: var(--font-inter-tight);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+}
+
+:root {
+  --radius: 0rem;
+
+  --background: #ffffff;
+  --foreground: #0b0b0b;
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0b;
+  --primary: #0b0b0b;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #0b0b0b;
+  --muted: #f4f4f4;
+  --muted-foreground: #5c5c5c;
+  --accent: #f4f4f4;
+  --accent-foreground: #0b0b0b;
+  --destructive: #c81e1e;
+  --border: #0b0b0b;
+  --input: #0b0b0b;
+  --ring: #00713a;
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
   body {
-    background-color: var(--color-paper);
-    color: var(--color-ink);
+    @apply bg-background text-foreground;
   }
 
   ::selection {
-    background-color: var(--color-accent);
-    color: var(--color-ink);
+    background-color: var(--color-marker);
+    color: var(--foreground);
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-accent-ink);
+    outline: 3px solid var(--ring);
     outline-offset: 3px;
   }
 }

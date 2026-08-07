@@ -33,8 +33,11 @@ Przeczytaj `context/progress-tracker.md` — mówi, gdzie stanął projekt.
 
 ## Commity
 
-Jedna linia, po angielsku, z przedrostkiem: `chore: init project`.
-Bez opisu — uzasadnienia idą do `context/progress-tracker.md`.
+**Nie commituj samodzielnie.** Po zmianie pokaż, co się zmieniło i jak działa,
+zaproponuj wiadomość w czacie i zatrzymaj się — review i commit należą do właściciela.
+
+Format: jedna linia, po angielsku, z przedrostkiem — `chore: init project`.
+Bez opisu; uzasadnienia idą do `context/progress-tracker.md`.
 Pełna konwencja: `context/code-standards.md`, sekcja `git`.
 
 ## Rdzeń, którego nie wolno „uprościć"
