@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* Tokeny motywu (kolory, typografia, jednostki osi) powstana przy pierwszym ekranie gry.
+   Patrz context/ui-context.md. Do tego czasu obowiazuja domyslne wartosci Tailwinda,
+   zeby nic nie udawalo podjetej decyzji. */
