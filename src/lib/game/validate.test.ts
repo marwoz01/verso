@@ -61,6 +61,24 @@ describe("validateObject", () => {
 
     expect(validateObject(object)).toContain("burj: brak nazwy w jezyku pl");
   });
+
+  it("wymaga bezpiecznego adresu zdjecia", () => {
+    const object = structuredClone(valid);
+    object.photo = { url: "http://example.com/photo.jpg", author: "Autor" };
+
+    expect(validateObject(object)).toContain(
+      "burj: zdjecie musi miec adres https",
+    );
+  });
+
+  it("wymaga autora zdjecia", () => {
+    const object = structuredClone(valid);
+    object.photo = { url: "https://example.com/photo.jpg", author: "" };
+
+    expect(validateObject(object)).toContain(
+      "burj: zdjecie musi miec podanego autora",
+    );
+  });
 });
 
 describe("validateDatabase", () => {

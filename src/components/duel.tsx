@@ -64,7 +64,7 @@ function Backdrop({ traitRef }: { traitRef: TraitRef }) {
         src={photo.url}
         alt=""
         fill
-        sizes="50vw"
+        sizes="(min-width: 768px) 50vw, 100vw"
         className="scale-105 object-cover opacity-25 grayscale"
         priority={false}
       />

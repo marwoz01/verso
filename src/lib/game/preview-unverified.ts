@@ -7,6 +7,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "burj-khalifa",
     name: { en: "Burj Khalifa", pl: "Burdż Chalifa" },
     domain: "architecture",
+    photo: {
+      url: "https://images.unsplash.com/photo-1459788025731-a85eb8dd27cc?auto=format&fit=crop&w=1600&q=80",
+      author: "Ashim D’Silva",
+    },
     traits: [
       {
         label: { en: "height", pl: "wysokość" },
@@ -44,6 +48,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "titanic",
     name: { en: "Titanic", pl: "Titanic" },
     domain: "transport",
+    photo: {
+      url: "https://images.unsplash.com/photo-1511316695145-4992006ffddb?auto=format&fit=crop&w=1600&q=80",
+      author: "Peter Hansen",
+    },
     traits: [
       {
         label: { en: "length", pl: "długość" },
@@ -91,6 +99,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "blue-whale",
     name: { en: "Blue whale", pl: "Płetwal błękitny" },
     domain: "nature",
+    photo: {
+      url: "https://images.unsplash.com/photo-1698472505070-6d3b90afb530?auto=format&fit=crop&w=1600&q=80",
+      author: "Chinh Le Duc",
+    },
     traits: [
       {
         label: { en: "body length", pl: "długość ciała" },
@@ -128,6 +140,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "poland",
     name: { en: "Poland", pl: "Polska" },
     domain: "geography",
+    photo: {
+      url: "https://images.unsplash.com/photo-1519197924294-4ba991a11128?auto=format&fit=crop&w=1600&q=80",
+      author: "Kamil Gliwiński",
+    },
     traits: [
       {
         label: { en: "population", pl: "liczba mieszkańców" },
@@ -162,6 +178,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
       pl: "Międzynarodowa Stacja Kosmiczna",
     },
     domain: "space",
+    photo: {
+      url: "https://images.unsplash.com/photo-1614314007212-0257d6e2f7d8?auto=format&fit=crop&w=1600&q=80",
+      author: "NASA",
+    },
     traits: [
       {
         label: { en: "orbital speed", pl: "prędkość orbitalna" },
@@ -199,6 +219,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "mount-everest",
     name: { en: "Mount Everest", pl: "Mount Everest" },
     domain: "nature",
+    photo: {
+      url: "https://images.unsplash.com/photo-1676471049029-f93852da351d?auto=format&fit=crop&w=1600&q=80",
+      author: "Weichao Deng",
+    },
     traits: [
       {
         label: { en: "height above sea level", pl: "wysokość n.p.m." },
@@ -236,6 +260,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "eiffel-tower",
     name: { en: "Eiffel Tower", pl: "Wieża Eiffla" },
     domain: "architecture",
+    photo: {
+      url: "https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1600&q=80",
+      author: "Anthony DELANOIX",
+    },
     traits: [
       {
         label: { en: "height", pl: "wysokość" },
@@ -273,6 +301,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "cheetah",
     name: { en: "Cheetah", pl: "Gepard" },
     domain: "nature",
+    photo: {
+      url: "https://images.unsplash.com/photo-1619494296448-ab5f847ece97?auto=format&fit=crop&w=1600&q=80",
+      author: "Sammy Wong",
+    },
     traits: [
       {
         label: { en: "top speed", pl: "prędkość maksymalna" },
@@ -310,6 +342,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "vatican-city",
     name: { en: "Vatican City", pl: "Watykan" },
     domain: "geography",
+    photo: {
+      url: "https://images.unsplash.com/photo-1760727141174-1ea63435c7d7?auto=format&fit=crop&w=1600&q=80",
+      author: "Dust Studio",
+    },
     traits: [
       {
         label: { en: "land area", pl: "powierzchnia" },
@@ -347,6 +383,10 @@ export const PREVIEW_OBJECTS: GameObject[] = [
     id: "usain-bolt",
     name: { en: "Usain Bolt", pl: "Usain Bolt" },
     domain: "sport",
+    photo: {
+      url: "https://images.unsplash.com/photo-1538061210394-c72c824af0fb?auto=format&fit=crop&w=1600&q=80",
+      author: "Jonathan Chng",
+    },
     traits: [
       {
         label: { en: "100 m world record", pl: "rekord świata na 100 m" },
