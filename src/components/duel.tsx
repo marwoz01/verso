@@ -28,6 +28,13 @@ const VERDICT_DELAY = 0.5;
 const CARRY_POP = 0.55;
 const SLIDE = 0.55;
 const GAME_OVER_HOLD = 1.8;
+const DESKTOP_MEDIA = "(min-width: 48rem)";
+
+function slideOffset(percent: number) {
+  return window.matchMedia(DESKTOP_MEDIA).matches
+    ? { xPercent: percent }
+    : { yPercent: percent };
+}
 
 function newSeed(): number {
   return Math.floor(Math.random() * 2 ** 31);
@@ -108,7 +115,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
       gsap.set([flash.current, badge.current], { autoAlpha: 0 });
       gsap.set([left.current, right.current], { clearProps: "all" });
       gsap.from(right.current, {
-        xPercent: 100,
+        ...slideOffset(100),
         duration: SLIDE,
         ease: "power2.out",
       });
@@ -195,14 +202,18 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
 
     timeline.to(badge.current, { autoAlpha: 0, duration: 0.2 }, "+=0.15");
     timeline.to(left.current, {
-      xPercent: -110,
+      ...slideOffset(-110),
       autoAlpha: 0,
       duration: SLIDE,
       ease: "power2.inOut",
     });
     timeline.to(
       right.current,
-      { xPercent: -100, duration: SLIDE, ease: "power2.inOut" },
+      {
+        ...slideOffset(-100),
+        duration: SLIDE,
+        ease: "power2.inOut",
+      },
       "<",
     );
     timeline.call(() => {
