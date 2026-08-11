@@ -98,14 +98,38 @@ poczeka do momentu, w którym zabierzemy się za Daily.
 | Obszar | Kiedy stanie się blokujące |
 |---|---|
 | Źródła wartości i sposób ich weryfikacji | przy budowaniu bazy startowej |
-| Podejście do dwujęzyczności (PL/EN) | przy pierwszym tekście w interfejsie |
 | Backend i baza rankingu Daily | przy trybie Daily |
 | Trwałość rekordu gracza | przy trybie Endless |
 | Pozyskiwanie grafik obiektów | przy warstwie wizualnej kart |
 | Hosting | przy pierwszym wdrożeniu |
 
-`<html lang="en">` w `layout.tsx` zostaje na razie bez zmian — zmienimy je razem z decyzją
-o dwujęzyczności, żeby nie robić tego dwa razy.
+## Dwujęzyczność
+
+Segment `[locale]` w `src/app/`, **oba języki z prefiksem** (`/en`, `/pl`). Goły `/`
+przekierowuje na `DEFAULT_LOCALE` przez `redirects()` w `next.config.ts`.
+
+**Dlaczego prefiks dla obu, a nie „domyślny bez prefiksu":** wariant bez prefiksu wymaga
+middleware negocjującego język i komplikuje `generateStaticParams`. Prefiks dla obu daje dwie
+statycznie prerenderowane ścieżki i zero middleware. Koszt: `/en` zamiast `/`.
+
+**`src/app/[locale]/layout.tsx` jest root layoutem** — nie ma `src/app/layout.tsx`. Dzięki temu
+`<html lang>` bierze się z segmentu, a nie jest zaszyte na sztywno.
+
+```
+src/lib/i18n.ts              stale, typ Dictionary, isLocale - BEZ importow
+src/lib/dictionaries/en.ts   tresc angielska
+src/lib/dictionaries/pl.ts   tresc polska
+src/lib/dictionaries/index.ts  getDictionary
+```
+
+**`i18n.ts` nie może niczego importować.** `next.config.ts` czyta z niego `DEFAULT_LOCALE`,
+a Next kompiluje config osobno, bez aliasu `@/` — każdy import w tym pliku wywali build
+z `MODULE_NOT_FOUND`. Stąd rozdzielenie: stałe i typy w `i18n.ts`, ładowanie słowników
+w `dictionaries/index.ts`.
+
+Teksty z osadzonym akcentem (znak graffiti na fragmencie zdania) trzymane są jako
+`{ before, highlight, after }` — pozwala to przenieść akcent na inne słowo w innym języku
+bez HTML-a w słowniku.
 
 ## Niezmienniki
 

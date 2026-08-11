@@ -58,12 +58,7 @@ Nic nie jest w połowie.
 - **Strona główna** (2026-08-07). Układ wzorowany na ekranie startowym The Higher Lower Game
   (wyśrodkowana kolumna: znak, pytanie, opis, dwa tryby, ramka z zasadą), styl wzorowany na
   `artemartemartem.com`: biel, czarna typografia, dużo powietrza.
-  - **Tokeny motywu i typografia ustalone** — pełny opis w `ui-context.md`. Krój: Inter Tight,
-    jeden na wszystko. Wybrany za neutralność: typografia ma być spokojna, żeby marker
-    mógł krzyczeć.
-  - **Dwa zielone, nie jeden.** `--color-accent` (`#00d26a`) czyta się jak marker, ale daje
-    na bieli 1,9:1 — jest wyłącznie dekoracją. Pod tekst służy `--color-accent-ink`
-    (`#00713a`, 6,1:1, przechodzi AA). Mylenie ich to najłatwiejszy sposób na nieczytelny napis.
+  - **Tokeny motywu i typografia ustalone** — pełny opis w `ui-context.md`.
   - **`src/components/graffiti.tsx`** — cztery znaki markerowe (`ArrowUp`, `Underline`,
     `Circle`, `Burst`) jako SVG. Jedyny element dekoracyjny w projekcie. Reguły w `ui-context.md`.
   - **Bez GSAP.** Strona jest statyczna, animacji nikt nie zamawiał. GSAP czeka na odsłonę
@@ -74,6 +69,55 @@ Nic nie jest w połowie.
     powstała. Sprawdzone: build przechodzi, 4 znaki SVG w wyjściu HTML, tokeny i `font-sans`
     rozwiązują się poprawnie w zbudowanym CSS, podzbiór `U+100-2BA` pokrywa polskie diakrytyki.
     **Pozycjonowanie znaków graffiti nad tekstem wymaga obejrzenia w przeglądarce.**
+- **Motyw przeniesiony z `villo.framer.website`** (2026-08-11). Decyzja właściciela: pełna
+  podmiana dotychczasowego kierunku „biała kartka + zielony marker" na ciemny system referencji.
+  Pełny opis tokenów w `ui-context.md`.
+  - **Tylko motyw ciemny.** Villo przełącza paletę przez `prefers-color-scheme`; my bierzemy
+    wyłącznie jego ciemną odsłonę i przybijamy ją w `:root` plus `color-scheme: dark`.
+    Wariantu jasnego nie ma — jedna paleta to jeden zestaw decyzji przy każdym komponencie.
+  - **Akcent `#e0f11f` zamiast `#2df100`.** Kluczowa konsekwencja: limonka na `#121212` daje
+    15,1:1 w obie strony, więc **akcent może nieść tekst i służyć za obrys fokusa**. Znika
+    wyjątek „obrys fokusa jest czarny", który wymuszała zieleń na bieli (1,53:1).
+  - **DM Sans zamiast Outfit**, dalej jeden krój, dalej `["latin", "latin-ext"]`.
+    Skala typografii przeniesiona 1:1 razem ze sparowanymi interliniami i trackingiem —
+    dlatego `text-*` nie wymaga już dokładania `leading-*` ani `tracking-*`.
+  - **Powierzchnie z drabinki przezroczystości** `#f0f0f0` w krokach 10/20/30/50 % zamiast
+    osobnych szarości. Blok „how it works" przestał być odwróconą płachtą (`bg-foreground`),
+    bo na ciemnym tle czytałby się jak biała dziura — jest teraz `bg-card`, bez obramowania.
+  - **Nowe logo: `Sparkle` w limonce nad wordmarkiem „VERSO"** wersalikami w wadze 900.
+    Kafelek pod znakiem zniknął — przy 15,1:1 nie jest już potrzebny. Favikona
+    (`src/app/icon.tsx`) generowana z kodu przez `ImageResponse`; stary `icon.png` skasowany,
+    bo dwa pliki `icon.*` w jednym katalogu to konflikt tras.
+  - **Big Shoulders na nagłówki i wordmark**, DM Sans zostaje na interfejs i akapity.
+    Sprawdzone, że Big Shoulders ma `latin-ext` — bez tego polskie znaki spadłyby na font
+    zastępczy. Krój jest wąski i display'owy, więc nie schodzi poniżej ~26 px.
+  - **Przyciski: niskie, wąskie, jeden promień 8 px, bez wersalików.** Trzy iteracje —
+    rozstrzelone wersaliki i promień skalowany z rozmiarem (do 22 px) odrzucone jako
+    przekombinowane. Efekt 3D niosą trzy tokeny cienia (`shadow-raised`,
+    `shadow-raised-hover`, `shadow-pressed`), celowo płytkie.
+  - **Hover to krok 30 % drabinki** (`#f0f0f04d`, czyli `#555555` na tle) — ten sam token
+    dla wszystkich wariantów, żaden nowy kolor w palecie.
+  - **Jeden styl na cały tekst drugorzędny** (`text-2xs font-medium uppercase`): linia hasła,
+    akapit prowadzący i treść bloku „how it works" wyglądają identycznie. Powód: trzy różne
+    stopnie i wagi sprawiały, że strona wyglądała na złożoną z czterech krojów zamiast dwóch.
+    Koszt: 10 px wersalikami nie uniesie długiego zdania — przy dłuższych tekstach trzeba
+    będzie świadomie dołożyć stopień do czytania.
+  - **`outline` i `marker` dostały `bg-card`.** Były przezroczyste i przez to ich cień czytał
+    się słabiej niż cień wypełnionego `default`, mimo tego samego tokena — cienie wewnętrzne
+    nie mają się na czym rysować bez powierzchni. Dwa przyciski obok siebie muszą mieć
+    tę samą bryłę.
+  - **Graffiti przestawione na `em`.** Pikselowe `inset` rozjechały pętlę przy zejściu tekstu
+    z 14 px na 10 px, a podkreślenie miało dwie wartości breakpointowe do ręcznego pilnowania.
+    Po przeliczeniu na `em` obie wyszły tą samą liczbą, więc wariant `sm:` zniknął.
+    Reguła i gotowe klasy w `ui-context.md`.
+  - **Pułapka Tailwinda v4:** `max-w-prose` jest wbudowaną utility (`65ch`) i **nie da się jej
+    nadpisać** tokenem `--container-prose` — token po cichu nie działa. Nasza szerokość
+    akapitu nazywa się dlatego `--container-narrow` / `max-w-narrow`. Sprawdzone odczytem
+    zbudowanego CSS, nie założeniem.
+  - **Zweryfikowane odczytem zbudowanego CSS i HTML**: `pnpm build` przechodzi, `pnpm lint`
+    kod wyjścia 0, `pnpm test:run` 2/2, `html{font-family:var(--font-dm-sans)}` rozwiązuje się
+    poprawnie, zakres `U+100-2BA` obecny (polskie diakrytyki), gwiazdka renderuje się jako
+    pełna bryła. **Nie obejrzane w przeglądarce** — brak narzędzi przeglądarkowych w sesji.
 
 ## Następne kroki
 
@@ -96,8 +140,10 @@ Nic nie jest w połowie.
 - **Strona główna nie została obejrzana w przeglądarce.** Sprawdzić `pnpm dev` i potwierdzić,
   że zielona pętla obejmuje „something else", a podkreślenie siedzi pod „bigger" — SVG
   pozycjonowane absolutnie łatwo rozjeżdżają się przy zmianie długości tekstu.
-- **Brak favikony.** Usunięta razem z boilerplate'em (była to favikona Vercela). W dev konsoli
-  pojawi się 404 dla `/favicon.ico`, dopóki nie wstawimy własnej.
+- **Favikona rozjechana z motywem.** `src/app/icon.png` to wciąż zielony kafelek z `ArrowUpDown` —
+  kolor i znak, których po podmianie motywu nie ma już nigdzie indziej. Do przerobienia na
+  `src/app/icon.tsx` (`ImageResponse` z `next/og`), co wymaga skasowania dotychczasowego PNG-a;
+  dwa pliki `icon.*` w jednym katalogu to konflikt tras.
 - **Brak kontroli wersji.** `create-next-app` uruchomiony z `--disable-git`, repozytorium nie
   jest zainicjowane. Warto to zrobić przed pierwszą większą zmianą — dziś każde skasowanie
   pliku jest nieodwracalne.

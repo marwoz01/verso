@@ -28,31 +28,6 @@ export function Underline({ className }: MarkProps) {
   );
 }
 
-export function ArrowUp({ className }: MarkProps) {
-  return (
-    <svg
-      viewBox="0 0 64 72"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M31 68C29 50 29 32 31 8"
-        stroke="currentColor"
-        strokeWidth="7"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 27C18 20 25 13 31 7c6 7 12 13 19 20"
-        stroke="currentColor"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export function Circle({ className }: MarkProps) {
   return (
     <svg
@@ -66,24 +41,6 @@ export function Circle({ className }: MarkProps) {
         d="M172 12C104 6 26 20 16 48c-9 26 60 46 132 44 66-2 138-18 138-44 0-24-62-38-124-38-22 0-44 3-62 8"
         stroke="currentColor"
         strokeWidth="5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-export function Burst({ className }: MarkProps) {
-  return (
-    <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M20 4v11M6 12l8 6M34 12l-8 6"
-        stroke="currentColor"
-        strokeWidth="4"
         strokeLinecap="round"
       />
     </svg>
