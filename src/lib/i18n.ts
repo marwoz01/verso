@@ -24,6 +24,8 @@ export type Dictionary = {
   };
   play: {
     streak: string;
+    best: string;
+    record: string;
     higher: string;
     lower: string;
     correct: string;

@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useRef, type ReactNode } from "react";
 
+import { prefersReducedMotion } from "@/lib/motion";
+
 gsap.registerPlugin(useGSAP);
 
 const COLUMNS = 7;
@@ -36,6 +38,12 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   function cover(onDone: () => void) {
     if (!columns.current) return;
 
+    if (prefersReducedMotion()) {
+      gsap.set(columns.current, { autoAlpha: 0 });
+      onDone();
+      return;
+    }
+
     gsap.set(columns.current, { autoAlpha: 1 });
     gsap.fromTo(
       columns.current.children,
@@ -52,6 +60,12 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
   function reveal() {
     if (!columns.current) return;
+
+    if (prefersReducedMotion()) {
+      gsap.set(columns.current, { autoAlpha: 0 });
+      busy.current = false;
+      return;
+    }
 
     gsap.set(columns.current, { autoAlpha: 1 });
     gsap.fromTo(

@@ -26,6 +26,8 @@ export const en: Dictionary = {
   },
   play: {
     streak: "Streak",
+    best: "Best",
+    record: "New record",
     higher: "Higher",
     lower: "Lower",
     correct: "Correct",

@@ -6,8 +6,9 @@
 
 ## Aktualna faza
 
-**Strona główna gotowa, gra jeszcze nie zbudowana.** Stoi szkielet, tokeny motywu i typografia.
-Nie ma ekranu pojedynku ani żadnych danych o obiektach — przyciski trybów nie są podpięte.
+**Ekran pojedynku domknięty, baza obiektów pusta.** Endless jest grywalny od strony głównej,
+ale chodzi na 10 niezweryfikowanych obiektach z `preview-unverified.ts`, więc łańcuch kończy się
+po ~10 rundach. Daily nie istnieje.
 
 ## W trakcie
 
@@ -130,8 +131,9 @@ Nic nie jest w połowie.
    pierwszej partii obiektów, na realnych przypadkach, nie z góry.
 3. **Przemierzyć symulator na prawdziwej bazie.** Liczby z syntetycznej są **górnym
    ograniczeniem** — patrz „Znane luki".
-4. **Pierwszy ekran pojedynku** — `playChain` zwraca gotową listę rund, więc widok
-   ma już z czego rysować.
+4. **„Did you know?"** — w zakresie v1, nietknięte. Czeka za bazą, bo najpierw potrzebuje
+   pola w modelu danych.
+5. **Tryb Daily** — przycisk na stronie głównej dalej prowadzi donikąd.
 
 - **Silnik łańcucha i pomiar zdrowia bazy** (2026-08-11). Model danych, walidacja, silnik
   i symulator. Zero Reacta, zero I/O — `src/lib/game/`, 23 testy. Pełne uzasadnienie decyzji
@@ -220,6 +222,55 @@ Nic nie jest w połowie.
   - **Flaga `arriving` jest konieczna**, nie ozdobna: odsłonięcie wisi na zmianie
     `usePathname()`, więc bez niej kolumny mrugnęłyby przy każdym wejściu na stronę z zewnątrz.
 
+- **Zdjęcia obiektów i przejścia na mobile** (2026-08-11). Karty dostały tło ze zdjęcia
+  pod gradientem; przejście karty na wąskim ekranie idzie w pionie (`yPercent`), nie w poziomie —
+  stąd `slideOffset()` czytający `(min-width: 48rem)` zamiast stałej osi.
+  - **Zdjęcia rozjaśnione** do `opacity-50` / `grayscale-60`, gradient z `background/90`
+    na `background/55`. Pierwsza wersja (`opacity-25` + pełne `grayscale`) była tak ciemna,
+    że zdjęcia nie niosły żadnej informacji o obiekcie.
+
+- **Następna karta czeka przyklejona do prawej** (2026-08-11). Przejście rundy było
+  odczuwalnie ospałe, bo składało się z dwóch animacji po sobie: odjazd (0,55 s) → przerysowanie
+  Reacta → wjazd nowej karty (0,55 s). Teraz trzeci panel z **następnym** obiektem stoi poza
+  ekranem przy prawej krawędzi i jedzie w tej samej klatce co dwa pozostałe.
+  - **Flaga `carried` wyłącza stare wjeżdżanie** po przejeździe. Zostaje tylko przy pierwszym
+    wejściu na ekran i po restarcie, gdzie nie ma poprzedniej rundy do przesunięcia.
+  - **Przycisk „Więcej"/„Mniej" wyciągnięty do `Choices`.** Czekająca karta musi wyglądać
+    identycznie jak docelowa, inaczej przyciski doskakują po wylądowaniu.
+  - **Podskok przeniesionej wartości bez opóźnienia** (`CARRY_POP` 0,55 → 0,45 s). Stare
+    `delay: SLIDE * 0.35` miało sens, gdy karta dopiero wjeżdżała; teraz liczba jest już
+    na miejscu, więc zwłoka czytała się jak zacięcie.
+  - **Uboczny zysk:** zdjęcie następnego obiektu jest w DOM-ie o rundę wcześniej, więc
+    wczytuje się z wyprzedzeniem.
+
+- **Klawiatura, rekord serii, `prefers-reduced-motion`** (2026-08-11). Domknięcie ekranu
+  pojedynku przed zabraniem się za bazę obiektów.
+  - **Strzałki góra/dół zamiast klikania.** Nasłuch na `window`, nie na przycisku — gracz nie
+    musi niczego fokusować. `guess()` i tak odbija wejście poza fazą `guessing`, więc
+    strzałki nie działają w trakcie odsłony ani na ekranie końca.
+  - **`src/lib/motion.ts`** — jedna funkcja `prefersReducedMotion()`, używana przez ekran
+    pojedynku i przejścia między ekranami. Sprawdzana **przy każdej animacji**, nie raz przy
+    montowaniu: gracz może przestawić ustawienie systemu w trakcie gry.
+  - **Reduced motion zeruje czas trwania, ale zachowuje pauzy.** Dwa pomocniki w `guess()`:
+    `beat()` skraca ruch do zera, `hold()` wydłuża przerwy do `STILL_HOLD` (1 s). Powód:
+    gdyby zzerować jedno i drugie, znak werdyktu mignąłby przez 0,15 s i nie dałoby się go
+    przeczytać. Naliczanie wartości znika, ale liczba zostaje na ekranie na sekundę.
+  - **Przy reduced motion pełnoekranowy błysk nie pojawia się w ogóle**, bo zerowe czasy
+    zbiegają zapalenie i zgaszenie do jednej klatki. To jest pożądane — nagły błysk
+    na całym ekranie jest gorszy niż jego brak.
+  - **Kolumny przejścia przy reduced motion są pomijane, nie przyspieszane.** Zerowy czas
+    trwania dałby jedną klatkę limonki na pełnym ekranie; `cover()` i `reveal()` wychodzą
+    wcześniej i wołają swój callback od razu.
+  - **Rekord w `localStorage`** pod `verso:best-streak`. Odczyt w lazy initializerze
+    `useState`, nie w efekcie — `setState` w efekcie wywala `react-hooks/set-state-in-effect`
+    (ta sama pułapka co przy ziarnie). Bramka hydratacji sprawia, że rozjazd serwer/klient
+    nigdy nie trafia do DOM-u. Odczyt i zapis w `try/catch`, bo `localStorage` rzuca
+    w trybie prywatnym.
+  - **`beatenRecord` to osobny stan, nie `correct === best`.** Bez tego wyrównanie rekordu
+    pokazywałoby „Nowy rekord".
+  - **Zweryfikowane**: `pnpm typecheck` i `pnpm lint` kod wyjścia 0, `pnpm test:run` 29/29,
+    `pnpm build` prerenderuje 7 tras. **Nie obejrzane w przeglądarce.**
+
 ## Decyzje z sesji grill-me (2026-08-11)
 
 Punktem wyjścia były trzy propozycje właściciela. Wszystkie trzy odpadły po weryfikacji,
@@ -262,18 +313,10 @@ ale każda wskazała realny problem — i to te problemy rozstrzygnęliśmy.
   Next 16 generuje typy tras do `.next/types/`, a katalog powstaje dopiero przy pierwszym
   `next build` / `next dev`. W CI `typecheck` musi iść **po** buildzie. Opis w
   `architecture-context.md`.
-- **Przyciski „Endless" i „Daily" nie prowadzą nigdzie** — to `<button>` bez obsługi zdarzeń,
-  bo tryby nie istnieją. Podpiąć przy pierwszym ekranie pojedynku.
+- **Przycisk „Daily" nie prowadzi nigdzie** — tryb nie istnieje. „Endless" jest podpięty.
 - **Strona główna nie została obejrzana w przeglądarce.** Sprawdzić `pnpm dev` i potwierdzić,
   że zielona pętla obejmuje „something else", a podkreślenie siedzi pod „bigger" — SVG
   pozycjonowane absolutnie łatwo rozjeżdżają się przy zmianie długości tekstu.
-- **Favikona rozjechana z motywem.** `src/app/icon.png` to wciąż zielony kafelek z `ArrowUpDown` —
-  kolor i znak, których po podmianie motywu nie ma już nigdzie indziej. Do przerobienia na
-  `src/app/icon.tsx` (`ImageResponse` z `next/og`), co wymaga skasowania dotychczasowego PNG-a;
-  dwa pliki `icon.*` w jednym katalogu to konflikt tras.
-- **Brak kontroli wersji.** `create-next-app` uruchomiony z `--disable-git`, repozytorium nie
-  jest zainicjowane. Warto to zrobić przed pierwszą większą zmianą — dziś każde skasowanie
-  pliku jest nieodwracalne.
 - **Liczby symulatora są górnym ograniczeniem, nie obietnicą.** Baza syntetyczna zakłada
   wartości rozłożone logarytmicznie w każdej jednostce i dostępność jednostek według wag
   z `fixtures.ts` — obie założone przeze mnie, obie optymistyczne. Prawdziwe obiekty
@@ -300,4 +343,4 @@ Pliki specyfikacji funkcji powstają w `context/feature-specs/` w miarę potrzeb
 zaczniesz funkcję, sprawdź lub zaproponuj odpowiedni plik.
 
 ---
-_Ostatnia aktualizacja: 2026-08-07 (stack wybrany, projekt postawiony, narzędzia zweryfikowane)_
+_Ostatnia aktualizacja: 2026-08-11 (ekran pojedynku domknięty: klawiatura, rekord serii, reduced motion)_

@@ -26,6 +26,8 @@ export const pl: Dictionary = {
   },
   play: {
     streak: "Seria",
+    best: "Rekord",
+    record: "Nowy rekord",
     higher: "Więcej",
     lower: "Mniej",
     correct: "Dobrze",

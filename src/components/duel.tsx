@@ -4,7 +4,13 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Check, ChevronDown, ChevronUp, RotateCcw, X } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { TransitionLink, useScreenTransition } from "@/components/transition";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,6 +19,7 @@ import { formatValue } from "@/lib/game/format";
 import { PREVIEW_OBJECTS } from "@/lib/game/preview-unverified";
 import type { Round, TraitRef } from "@/lib/game/types";
 import type { Dictionary, Locale } from "@/lib/i18n";
+import { prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -28,7 +35,9 @@ const VERDICT_DELAY = 0.5;
 const CARRY_POP = 0.45;
 const SLIDE = 0.55;
 const GAME_OVER_HOLD = 1.8;
+const STILL_HOLD = 1;
 const DESKTOP_MEDIA = "(min-width: 48rem)";
+const BEST_STREAK_KEY = "verso:best-streak";
 
 function slideOffset(percent: number) {
   return window.matchMedia(DESKTOP_MEDIA).matches
@@ -38,6 +47,25 @@ function slideOffset(percent: number) {
 
 function newSeed(): number {
   return Math.floor(Math.random() * 2 ** 31);
+}
+
+function readBestStreak(): number {
+  if (typeof window === "undefined") return 0;
+
+  try {
+    const stored = Number(window.localStorage.getItem(BEST_STREAK_KEY));
+    return Number.isFinite(stored) && stored > 0 ? Math.floor(stored) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeBestStreak(streak: number) {
+  try {
+    window.localStorage.setItem(BEST_STREAK_KEY, String(streak));
+  } catch {
+    return;
+  }
 }
 
 function useHydrated(): boolean {
@@ -109,6 +137,8 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
   const [phase, setPhase] = useState<Phase>("guessing");
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [correct, setCorrect] = useState(0);
+  const [best, setBest] = useState(readBestStreak);
+  const [beatenRecord, setBeatenRecord] = useState(false);
 
   const container = useRef<HTMLElement>(null);
   const left = useRef<HTMLDivElement>(null);
@@ -132,6 +162,8 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
     () => {
       if (!left.current || !right.current) return;
 
+      const still = prefersReducedMotion();
+
       if (amount.current) amount.current.textContent = "?";
       if (suffix.current) suffix.current.textContent = "";
 
@@ -142,7 +174,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
       if (!carried.current) {
         gsap.from(right.current, {
           ...slideOffset(100),
-          duration: SLIDE,
+          duration: still ? 0 : SLIDE,
           ease: "power2.out",
         });
       }
@@ -154,7 +186,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
         {
           scale: 1,
           autoAlpha: 1,
-          duration: CARRY_POP,
+          duration: still ? 0 : CARRY_POP,
           ease: "back.out(1.8)",
         },
       );
@@ -171,14 +203,28 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
 
     setPhase("revealing");
     setVerdict(isRight ? "correct" : "wrong");
-    if (isRight) setCorrect((current) => current + 1);
+
+    if (isRight) {
+      const streak = correct + 1;
+      setCorrect(streak);
+
+      if (streak > best) {
+        setBest(streak);
+        setBeatenRecord(true);
+        writeBestStreak(streak);
+      }
+    }
+
+    const still = prefersReducedMotion();
+    const beat = (seconds: number) => (still ? 0 : seconds);
+    const hold = (seconds: number) => (still ? STILL_HOLD : seconds);
 
     const counter = { value: 0 };
     const timeline = gsap.timeline();
 
     timeline.to(counter, {
       value: hidden.value * COUNT_SHORT,
-      duration: COUNT_UP,
+      duration: beat(COUNT_UP),
       ease: COUNT_EASE,
       onUpdate: () => {
         const ticking = formatValue(
@@ -206,40 +252,44 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
         if (suffix.current) suffix.current.textContent = landed.suffix;
       },
       undefined,
-      `+=${COUNT_PAUSE}`,
+      `+=${hold(COUNT_PAUSE)}`,
     );
 
     timeline.fromTo(
       flash.current,
       { autoAlpha: 0 },
-      { autoAlpha: 1, duration: 0.15 },
+      { autoAlpha: 1, duration: beat(0.15) },
       `+=${VERDICT_DELAY}`,
     );
     timeline.fromTo(
       badge.current,
       { scale: 0.5, autoAlpha: 0 },
-      { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2)" },
+      { scale: 1, autoAlpha: 1, duration: beat(0.3), ease: "back.out(2)" },
       "<",
     );
-    timeline.to(flash.current, { autoAlpha: 0, duration: 0.45 });
+    timeline.to(flash.current, { autoAlpha: 0, duration: beat(0.45) });
 
     if (!isRight) {
       timeline.call(() => setPhase("over"), undefined, `+=${GAME_OVER_HOLD}`);
       return;
     }
 
-    timeline.to(badge.current, { autoAlpha: 0, duration: 0.2 }, "+=0.15");
+    timeline.to(
+      badge.current,
+      { autoAlpha: 0, duration: beat(0.2) },
+      `+=${hold(0.15)}`,
+    );
     timeline.to(left.current, {
       ...slideOffset(-110),
       autoAlpha: 0,
-      duration: SLIDE,
+      duration: beat(SLIDE),
       ease: "power2.inOut",
     });
     timeline.to(
       right.current,
       {
         ...slideOffset(-100),
-        duration: SLIDE,
+        duration: beat(SLIDE),
         ease: "power2.inOut",
       },
       "<",
@@ -249,7 +299,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
         preview.current,
         {
           ...slideOffset(0),
-          duration: SLIDE,
+          duration: beat(SLIDE),
           ease: "power2.inOut",
         },
         "<",
@@ -268,10 +318,23 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
     });
   }
 
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+
+      event.preventDefault();
+      guess(event.key === "ArrowUp");
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   function restart() {
     setSeed(newSeed());
     setIndex(0);
     setCorrect(0);
+    setBeatenRecord(false);
     setPhase("guessing");
     setVerdict(null);
   }
@@ -381,8 +444,13 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
             {exhausted ? t.exhausted : t.wrong}
           </p>
           <p className="text-2xs text-muted-foreground font-medium uppercase">
-            {t.streak}: {correct}
+            {t.streak}: {correct} &middot; {t.best}: {best}
           </p>
+          {beatenRecord ? (
+            <p className="text-marker text-2xs font-medium uppercase">
+              {t.record}
+            </p>
+          ) : null}
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button size="lg" onClick={() => sweep(restart)}>
               <RotateCcw />
