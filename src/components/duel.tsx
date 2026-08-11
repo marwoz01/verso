@@ -25,7 +25,7 @@ const COUNT_DECIMALS = 2;
 const COUNT_SHORT = 0.995;
 const COUNT_PAUSE = 0.35;
 const VERDICT_DELAY = 0.5;
-const CARRY_POP = 0.55;
+const CARRY_POP = 0.45;
 const SLIDE = 0.55;
 const GAME_OVER_HOLD = 1.8;
 const DESKTOP_MEDIA = "(min-width: 48rem)";
@@ -72,10 +72,31 @@ function Backdrop({ traitRef }: { traitRef: TraitRef }) {
         alt=""
         fill
         sizes="(min-width: 768px) 50vw, 100vw"
-        className="scale-105 object-cover opacity-25 grayscale"
+        className="scale-105 object-cover opacity-50 grayscale-60"
         priority={false}
       />
-      <div className="from-background via-background/70 to-background absolute inset-0 bg-linear-to-b" />
+      <div className="from-background/90 via-background/55 to-background/90 absolute inset-0 bg-linear-to-b" />
+    </div>
+  );
+}
+
+function Choices({
+  t,
+  onGuess,
+}: {
+  t: Dictionary["play"];
+  onGuess?: (higher: boolean) => void;
+}) {
+  return (
+    <div className="mt-4 flex gap-3">
+      <Button size="lg" onClick={() => onGuess?.(true)}>
+        <ChevronUp />
+        {t.higher}
+      </Button>
+      <Button size="lg" variant="outline" onClick={() => onGuess?.(false)}>
+        <ChevronDown />
+        {t.lower}
+      </Button>
     </div>
   );
 }
@@ -93,6 +114,8 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
   const left = useRef<HTMLDivElement>(null);
   const leftValue = useRef<HTMLParagraphElement>(null);
   const right = useRef<HTMLDivElement>(null);
+  const preview = useRef<HTMLDivElement>(null);
+  const carried = useRef(false);
   const amount = useRef<HTMLSpanElement>(null);
   const suffix = useRef<HTMLSpanElement>(null);
   const flash = useRef<HTMLDivElement>(null);
@@ -114,11 +137,17 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
 
       gsap.set([flash.current, badge.current], { autoAlpha: 0 });
       gsap.set([left.current, right.current], { clearProps: "all" });
-      gsap.from(right.current, {
-        ...slideOffset(100),
-        duration: SLIDE,
-        ease: "power2.out",
-      });
+      if (preview.current) gsap.set(preview.current, slideOffset(100));
+
+      if (!carried.current) {
+        gsap.from(right.current, {
+          ...slideOffset(100),
+          duration: SLIDE,
+          ease: "power2.out",
+        });
+      }
+      carried.current = false;
+
       gsap.fromTo(
         leftValue.current,
         { scale: 0.45, autoAlpha: 0 },
@@ -127,7 +156,6 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
           autoAlpha: 1,
           duration: CARRY_POP,
           ease: "back.out(1.8)",
-          delay: SLIDE * 0.35,
         },
       );
     },
@@ -216,12 +244,24 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
       },
       "<",
     );
+    if (preview.current) {
+      timeline.to(
+        preview.current,
+        {
+          ...slideOffset(0),
+          duration: SLIDE,
+          ease: "power2.inOut",
+        },
+        "<",
+      );
+    }
     timeline.call(() => {
       if (index + 1 >= rounds.length) {
         setPhase("over");
         return;
       }
 
+      carried.current = true;
       setIndex((current) => current + 1);
       setPhase("guessing");
       setVerdict(null);
@@ -241,6 +281,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
   }
 
   const exhausted = phase === "over" && verdict !== "wrong";
+  const next = rounds[index + 1];
   const shown = formatValue(
     round.reference.object.traits[round.reference.traitIndex].value,
     round.unit,
@@ -250,7 +291,7 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
 
   return (
     <main ref={container} className="flex min-h-dvh flex-col overflow-hidden">
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="relative flex flex-1 flex-col md:flex-row">
         <div
           ref={left}
           className="relative flex flex-1 items-center justify-center px-6 py-10"
@@ -282,20 +323,26 @@ export function Duel({ locale, t }: { locale: Locale; t: Dictionary["play"] }) {
               <span ref={suffix} className="text-marker text-3xl sm:text-4xl" />
             </p>
 
-            {phase === "guessing" ? (
-              <div className="mt-4 flex gap-3">
-                <Button size="lg" onClick={() => guess(true)}>
-                  <ChevronUp />
-                  {t.higher}
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => guess(false)}>
-                  <ChevronDown />
-                  {t.lower}
-                </Button>
-              </div>
-            ) : null}
+            {phase === "guessing" ? <Choices t={t} onGuess={guess} /> : null}
           </div>
         </div>
+
+        {next ? (
+          <div
+            ref={preview}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-0 flex h-1/2 w-full items-center justify-center px-6 py-10 md:top-0 md:left-1/2 md:h-full md:w-1/2"
+          >
+            <Backdrop traitRef={next.hidden} />
+            <div className="relative flex flex-col items-center gap-3 text-center">
+              <Heading traitRef={next.hidden} locale={locale} />
+              <p className="font-heading text-5xl font-black sm:text-7xl">
+                <span className="text-marker">?</span>
+              </p>
+              <Choices t={t} />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div
