@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import "../globals.css";
 import { LocaleSwitch } from "@/components/locale-switch";
+import { TransitionProvider } from "@/components/transition";
 import { getDictionary } from "@/lib/dictionaries";
 import { LOCALES, isLocale } from "@/lib/i18n";
 
@@ -45,8 +46,10 @@ export default async function LocaleLayout({
       className={`${dmSans.variable} ${bigShoulders.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <LocaleSwitch current={locale} />
-        {children}
+        <TransitionProvider>
+          <LocaleSwitch current={locale} />
+          {children}
+        </TransitionProvider>
       </body>
     </html>
   );

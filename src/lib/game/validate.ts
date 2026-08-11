@@ -27,6 +27,14 @@ export function validateObject(object: GameObject): string[] {
     problems.push(at(`nieznana dziedzina ${object.domain}`));
   }
 
+  if (object.photo && !object.photo.url.startsWith("https://")) {
+    problems.push(at("zdjecie musi miec adres https"));
+  }
+
+  if (object.photo && !object.photo.author.trim()) {
+    problems.push(at("zdjecie musi miec podanego autora"));
+  }
+
   if (object.traits.length < MIN_TRAITS) {
     problems.push(at(`ma ${object.traits.length} cech, wymagane ${MIN_TRAITS}`));
   }

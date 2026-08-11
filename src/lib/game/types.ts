@@ -19,10 +19,16 @@ export type Trait = {
   volatility: Volatility;
 };
 
+export type Photo = {
+  url: string;
+  author: string;
+};
+
 export type GameObject = {
   id: string;
   name: Record<Locale, string>;
   domain: Domain;
+  photo?: Photo;
   traits: Trait[];
 };
 

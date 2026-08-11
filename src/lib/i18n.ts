@@ -23,7 +23,6 @@ export type Dictionary = {
     body: { before: string; highlight: string; after: string };
   };
   play: {
-    preview: string;
     streak: string;
     higher: string;
     lower: string;
@@ -33,7 +32,6 @@ export type Dictionary = {
     again: string;
     home: string;
     relaxed: string;
-    units: Record<string, string>;
     time: {
       second: string;
       minute: string;

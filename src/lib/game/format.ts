@@ -19,16 +19,22 @@ const HOUR = 3600;
 const DAY = 86_400;
 const YEAR = 31_557_600;
 
-function compact(value: number, locale: Locale): string {
+function digits(fixed: number | undefined, adaptive: number) {
+  return fixed === undefined
+    ? { maximumFractionDigits: adaptive }
+    : { minimumFractionDigits: fixed, maximumFractionDigits: fixed };
+}
+
+function compact(value: number, locale: Locale, fixed?: number): string {
   return new Intl.NumberFormat(locale, {
     notation: "compact",
-    maximumFractionDigits: 1,
+    ...digits(fixed, 1),
   }).format(value);
 }
 
-function plain(value: number, locale: Locale): string {
+function plain(value: number, locale: Locale, fixed?: number): string {
   return new Intl.NumberFormat(locale, {
-    maximumFractionDigits: value < 10 ? 2 : 0,
+    ...digits(fixed, value < 10 ? 2 : 0),
   }).format(value);
 }
 
@@ -36,24 +42,28 @@ function formatTime(
   seconds: number,
   locale: Locale,
   labels: TimeLabels,
+  fixed?: number,
 ): FormattedValue {
   if (seconds < 90) {
-    return { amount: plain(seconds, locale), suffix: labels.second };
+    return { amount: plain(seconds, locale, fixed), suffix: labels.second };
   }
 
   if (seconds < 90 * MINUTE) {
-    return { amount: plain(seconds / MINUTE, locale), suffix: labels.minute };
+    return {
+      amount: plain(seconds / MINUTE, locale, fixed),
+      suffix: labels.minute,
+    };
   }
 
   if (seconds < 48 * HOUR) {
-    return { amount: plain(seconds / HOUR, locale), suffix: labels.hour };
+    return { amount: plain(seconds / HOUR, locale, fixed), suffix: labels.hour };
   }
 
   if (seconds < 2 * YEAR) {
-    return { amount: plain(seconds / DAY, locale), suffix: labels.day };
+    return { amount: plain(seconds / DAY, locale, fixed), suffix: labels.day };
   }
 
-  return { amount: compact(seconds / YEAR, locale), suffix: labels.year };
+  return { amount: compact(seconds / YEAR, locale, fixed), suffix: labels.year };
 }
 
 export function formatValue(
@@ -61,33 +71,34 @@ export function formatValue(
   unit: Unit,
   locale: Locale,
   labels: TimeLabels,
+  fixed?: number,
 ): FormattedValue {
   switch (unit) {
     case "people":
-      return { amount: compact(value, locale), suffix: "" };
+      return { amount: compact(value, locale, fixed), suffix: "" };
 
     case "money":
-      return { amount: compact(value, locale), suffix: "USD" };
+      return { amount: compact(value, locale, fixed), suffix: "USD" };
 
     case "length":
       return value < 1000
-        ? { amount: plain(value, locale), suffix: "m" }
-        : { amount: compact(value / 1000, locale), suffix: "km" };
+        ? { amount: plain(value, locale, fixed), suffix: "m" }
+        : { amount: compact(value / 1000, locale, fixed), suffix: "km" };
 
     case "weight":
       return value < 1000
-        ? { amount: plain(value, locale), suffix: "kg" }
-        : { amount: compact(value / 1000, locale), suffix: "t" };
+        ? { amount: plain(value, locale, fixed), suffix: "kg" }
+        : { amount: compact(value / 1000, locale, fixed), suffix: "t" };
 
     case "speed":
-      return { amount: plain(value * 3.6, locale), suffix: "km/h" };
+      return { amount: plain(value * 3.6, locale, fixed), suffix: "km/h" };
 
     case "area":
       return value < 1_000_000
-        ? { amount: compact(value, locale), suffix: "m²" }
-        : { amount: compact(value / 1_000_000, locale), suffix: "km²" };
+        ? { amount: compact(value, locale, fixed), suffix: "m²" }
+        : { amount: compact(value / 1_000_000, locale, fixed), suffix: "km²" };
 
     case "time":
-      return formatTime(value, locale, labels);
+      return formatTime(value, locale, labels, fixed);
   }
 }

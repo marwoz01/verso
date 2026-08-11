@@ -4,6 +4,15 @@ import { DEFAULT_LOCALE } from "./src/lib/i18n";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
+  },
   async redirects() {
     return [
       {

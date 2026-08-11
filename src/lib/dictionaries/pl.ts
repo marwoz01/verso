@@ -25,7 +25,6 @@ export const pl: Dictionary = {
     },
   },
   play: {
-    preview: "Dane podglądowe — wartości jeszcze niezweryfikowane",
     streak: "Seria",
     higher: "Więcej",
     lower: "Mniej",
@@ -35,15 +34,6 @@ export const pl: Dictionary = {
     again: "Zagraj jeszcze raz",
     home: "Wróć na stronę główną",
     relaxed: "Silnik rozluźnił warunki, żeby utrzymać łańcuch",
-    units: {
-      people: "Ludzie",
-      money: "Pieniądze",
-      length: "Długość",
-      weight: "Masa",
-      time: "Czas",
-      speed: "Prędkość",
-      area: "Powierzchnia",
-    },
     time: {
       second: "s",
       minute: "min",

@@ -187,6 +187,39 @@ Nic nie jest w połowie.
     generowanie fontu zastępczego, co przy nagłówku 128 px daje widoczny skok układu.
     Ustawione jawnie: `fallback` na kroje wąskie + `adjustFontFallback: false`.
 
+- **Warstwa wizualna ekranu pojedynku na GSAP** (2026-08-11). Pierwsze użycie GSAP w projekcie —
+  do tej pory czekał, aż pojawi się ruch niosący znaczenie. Opis animacji w `ui-context.md`.
+  - **Usunięte z ekranu:** baner o danych podglądowych, etykieta jednostki ze środka.
+    „Seria" przeniesiona w prawy dolny róg. Etykieta jednostki zwolniła środek pod odsłonę
+    werdyktu — konsekwencje tej zamiany opisane w `ui-context.md`.
+  - **Naliczanie wartości zamiast jej pojawienia się.** `power3.out` przez 1 s: szybko
+    na starcie, wyhamowanie na końcu. Odsłona to jedyny moment rundy, w którym gracz czeka.
+  - **Przejście kart jako zapis rdzenia gry.** Prawa karta przesuwa się o `xPercent: -100`,
+    czyli własną szerokość, więc ląduje dokładnie tam, gdzie stała lewa. Działa to tylko
+    dlatego, że po usunięciu środkowej etykiety obie karty są sąsiadującymi `flex-1`
+    o równej szerokości.
+  - **Werdykt limonką, nie zielenią.** Paleta ma jeden akcent plus alert; trzeci kolor byłby
+    wyłomem w „minimalizm z jednym akcentem".
+  - **Pułapka React 19:** `contextSafe` z `useGSAP` wywala `react-hooks/refs` — reguła uznaje
+    przekazanie funkcji czytającej refy za ryzykowne w trakcie renderu. Handler jest zwykłą
+    funkcją; refy czyta dopiero przy kliknięciu, więc problem nie istnieje.
+  - **Osierocone teksty skasowane** — `play.preview` i `play.units` w obu słownikach oraz
+    w typie `Dictionary`. Zniknęły razem z banerem i etykietą jednostki.
+  - **Błąd złapany przy przeglądaniu:** znak werdyktu pojawiał się na starcie gry. Ścieżka
+    błędnej odpowiedzi nie gasiła znaku, więc GSAP zostawiał na nim inline'owe `opacity: 1`,
+    które bije klasę `opacity-0`. Po restarcie `verdict` wracał na `null` i React podmieniał
+    `X` na `Check` w dalej widocznym pudełku. Naprawione zerowaniem znaku i błysku na starcie
+    każdej rundy, nie łatką na jednej ścieżce.
+- **Przejścia między ekranami** (2026-08-11). `src/components/transition.tsx` — siedem
+  limonkowych kolumn rosnących od dołu, rozchodzących się od środka na boki. Opis
+  w `ui-context.md`.
+  - **`TransitionProvider` mieszka w `[locale]/layout.tsx`**, bo tylko tam przetrwa nawigację
+    między `/pl` a `/pl/play`. Gdyby siedział na stronie, odmontowałby się w połowie ruchu.
+  - **`router.push` czeka na `onComplete` zasłaniania** — dzięki temu ładowanie trasy dzieje
+    się pod zasłoną i gracz nie widzi pustego ekranu.
+  - **Flaga `arriving` jest konieczna**, nie ozdobna: odsłonięcie wisi na zmianie
+    `usePathname()`, więc bez niej kolumny mrugnęłyby przy każdym wejściu na stronę z zewnątrz.
+
 ## Decyzje z sesji grill-me (2026-08-11)
 
 Punktem wyjścia były trzy propozycje właściciela. Wszystkie trzy odpadły po weryfikacji,

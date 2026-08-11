@@ -25,7 +25,6 @@ export const en: Dictionary = {
     },
   },
   play: {
-    preview: "Preview data — values not verified yet",
     streak: "Streak",
     higher: "Higher",
     lower: "Lower",
@@ -35,15 +34,6 @@ export const en: Dictionary = {
     again: "Play again",
     home: "Back home",
     relaxed: "Engine relaxed its rules to keep the chain alive",
-    units: {
-      people: "People",
-      money: "Money",
-      length: "Length",
-      weight: "Weight",
-      time: "Time",
-      speed: "Speed",
-      area: "Area",
-    },
     time: {
       second: "s",
       minute: "min",

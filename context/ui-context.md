@@ -280,9 +280,14 @@ się nadpisują.
               L U D Z I E                     ← jednostka, wspólna
 ```
 
-Jednostka jest wspólna dla obu kart, więc stoi raz, pośrodku. Cecha jest różna po każdej
-stronie, więc stoi przy karcie. Bez obu gracz nie wie, co porównuje: „mieszkańcy"
-i „słuchacze" to ta sama jednostka, ale nie to samo pytanie.
+**Jednostka na środku została usunięta** (2026-08-11, decyzja właściciela). Powyższy szkic
+opisuje stan sprzed zmiany; zostawiam go, bo pokazuje, co ta etykieta niosła.
+
+Pytanie „co my właściwie porównujemy" niesie teraz **etykieta cechy przy każdej karcie**
+(„wysokość", „długość granicy") plus **przyrostek przy odsłoniętej wartości** (`m`, `km`,
+`USD`). Ryzyko zostaje i warto je znać: przed odsłonięciem prawa karta pokazuje `?` bez
+przyrostka, więc gracz zna jednostkę tylko z etykiet. Gdyby to okazało się mylące, etykieta
+jednostki wraca — ale nie na środek, bo środek zajęła teraz odsłona werdyktu.
 
 **Layout:** desktop — karty obok siebie · mobile — jedna nad drugą.
 
@@ -308,6 +313,79 @@ Druga grupa to spora część bazy, więc **nie może być traktowana jako brak 
 Potrzebne będą dwa równorzędne warianty karty, nie jeden wariant plus stan awaryjny.
 
 `[do zaprojektowania]` Jak wygląda karta obiektu abstrakcyjnego.
+
+## Ruch — ekran pojedynku
+
+GSAP wchodzi tutaj i tylko tutaj. Cztery animacje, każda niesie znaczenie:
+
+| ruch | stała | czas | krzywa | po co |
+|---|---|---|---|---|
+| naliczanie wartości | `COUNT_UP`, `COUNT_EASE` | 2,5 s | `power4.out` | szybko na starcie, mocne wyhamowanie na końcu — napięcie przed liczbą |
+| błysk werdyktu | — | 0,15 s + 0,45 s | — | limonka przy trafieniu, czerwień przy błędzie |
+| znak werdyktu | — | 0,3 s | `back.out(2)` | `Check` albo `X`, wyskakuje ze skali 0,5 |
+| przejście kart | `SLIDE` | 0,55 s | `power2.inOut` | prawa wchodzi na miejsce lewej, lewa wypada, nowa wjeżdża z prawej |
+| pauza przed menu końca | `GAME_OVER_HOLD` | 1,8 s | — | czas na zobaczenie `X` i odsłoniętej liczby, zanim zakryje je menu |
+
+Wszystkie cztery stałe stoją na górze `duel.tsx` i są jedynym miejscem do strojenia tempa.
+
+**Naliczanie zamiast pojawienia się liczby** jest tu sednem, nie ozdobą. Odsłona jest jedynym
+momentem rundy, w którym gracz czeka — liczba, która po prostu się pojawia, zabiera ten moment.
+Wyhamowanie na końcu robi to samo, co bęben przed werdyktem.
+
+**Granicą widocznego hamowania nie jest krzywa, tylko precyzja zapisu.** Liczby idą przez
+notację zwartą z jednym miejscem po przecinku, więc „7 mln" obejmuje wszystko od 6,95 do 7,04.
+Gdy wartość wejdzie w ten przedział, tekst przestaje się zmieniać, choć tween nadal biegnie.
+Mocniejsze wyhamowanie (`expo.out`, `power4.out`) wchodzi w ten przedział **wcześniej**, więc
+wydłuża moment, w którym nic się nie rusza, zamiast wydłużać widoczne zwalnianie.
+
+Dziś nie przeszkadza, bo błysk werdyktu startuje 0,3 s przed końcem naliczania i przykrywa
+ogon. Gdyby trzeba było iść dalej w „wolniejszy koniec", właściwym ruchem jest **więcej miejsc
+po przecinku w trakcie animacji**, nie ostrzejsza krzywa.
+
+**Przejście robi trzy rzeczy naraz** i dlatego jest czytelne: prawa karta przesuwa się
+o `xPercent: -100`, czyli dokładnie o własną szerokość, więc ląduje tam, gdzie stała lewa.
+Lewa wypada w `-110` z zanikiem. Nowa wjeżdża z `100`. To jest wizualny zapis rdzenia gry —
+odsłonięty obiekt zostaje i staje się punktem odniesienia.
+
+Werdykt jest **limonką, nie zielenią**. Paleta ma jeden akcent i drugi kolor alertu; trzeci
+byłby wyłomem w „minimalizm z jednym akcentem". Limonka na `#121212` czyta się jako
+potwierdzenie, a czerwień `#ff2244` jako błąd.
+
+**Ograniczenie:** przejście jest poziome także na wąskim ekranie, gdzie karty stoją jedna nad
+drugą. Kierunek „w lewo" nadal czyta się jako wyjście, ale metafora „prawa staje się lewą"
+na mobile nie działa. Do rozstrzygnięcia, gdy ekran zobaczy telefon.
+
+## Ruch — przejścia między ekranami
+
+`src/components/transition.tsx`. Siedem limonkowych kolumn na całą wysokość, `z-50`, ponad
+wszystkim. Jeden ruch w dwóch połowach:
+
+```
+ZASŁONIĘCIE   origin: bottom   scaleY 0 → 1   rosną w górę
+              stagger from: "center"          od środka na boki
+                    ↓ dopiero teraz router.push
+ODSŁONIĘCIE   origin: top      scaleY 1 → 0   kurczą się w górę
+              stagger from: "center"          ten sam porządek
+```
+
+**Zamiana punktu zaczepienia z `bottom` na `top` jest tu wszystkim.** Obie połowy biegną
+wtedy w tę samą stronę — ekran wygląda, jakby jedna płachta przejechała po nim w górę,
+a nie jakby coś urosło i opadło.
+
+`stagger: { from: "center" }` daje rozejście od środka. Siedem kolumn to liczba nieparzysta,
+więc środek jest kolumną, a nie szczeliną — rozejście wychodzi symetryczne.
+
+**Nawigacja czeka na animację.** `router.push` odpala się w `onComplete` zasłaniania, więc
+gracz nigdy nie zobaczy pustego ekranu w trakcie ładowania. Odsłonięcie rusza po zmianie
+`usePathname()`, ale tylko gdy ustawiona jest flaga `arriving` — bez niej kolumny mrugnęłyby
+przy pierwszym wejściu na stronę.
+
+Objęte przejściem: „Endless" ze strony głównej i „Wróć na stronę główną" z ekranu przegranej.
+**Nieobjęte:** przycisk „Daily" (nie prowadzi jeszcze nigdzie), przełącznik języka oraz przyciski
+wstecz/dalej przeglądarki — tamte zmieniają `pathname` bez flagi, więc idą bez animacji.
+
+**Nie ma obsługi `prefers-reduced-motion`.** Pełnoekranowe przetarcie to dokładnie ten rodzaj
+ruchu, który przeszkadza osobom wrażliwym na animacje. Do dołożenia przez `gsap.matchMedia()`.
 
 ## Jeszcze nieustalone
 

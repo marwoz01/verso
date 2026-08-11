@@ -1,8 +1,8 @@
 import { ArrowRightLeft, Sparkle } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Circle, Underline } from "@/components/graffiti";
+import { TransitionLink } from "@/components/transition";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale } from "@/lib/i18n";
@@ -50,12 +50,15 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <Button variant="outline" size="lg" className="w-full sm:w-auto">
               {t.modes.daily}
             </Button>
-            <Link
+            <TransitionLink
               href={`/${locale}/play`}
-              className={buttonVariants({ size: "lg", className: "w-full sm:w-auto" })}
+              className={buttonVariants({
+                size: "lg",
+                className: "w-full sm:w-auto",
+              })}
             >
               {t.modes.endless}
-            </Link>
+            </TransitionLink>
           </div>
 
           <div className="bg-card mt-10 flex w-0 min-w-full items-center gap-5 rounded-sm p-6 text-left">
