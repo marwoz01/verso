@@ -22,6 +22,26 @@ export type Dictionary = {
     title: string;
     body: { before: string; highlight: string; after: string };
   };
+  play: {
+    preview: string;
+    streak: string;
+    higher: string;
+    lower: string;
+    correct: string;
+    wrong: string;
+    exhausted: string;
+    again: string;
+    home: string;
+    relaxed: string;
+    units: Record<string, string>;
+    time: {
+      second: string;
+      minute: string;
+      hour: string;
+      day: string;
+      year: string;
+    };
+  };
 };
 
 export function isLocale(value: string): value is Locale {

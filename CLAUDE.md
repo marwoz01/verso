@@ -44,6 +44,10 @@ Pełna konwencja: `context/code-standards.md`, sekcja `git`.
 
 Ciągłość łańcucha trzyma **obiekt**, nie jednostka. Odsłonięty obiekt zostaje punktem
 odniesienia następnej rundy, ale mierzony jest **inną cechą w innej jednostce**.
-Z tego wynika wymóg: każdy obiekt potrzebuje min. 2 cech w min. 2 różnych jednostkach.
+Z tego wynika wymóg: każdy obiekt potrzebuje **min. 3 cech w min. 3 różnych jednostkach**.
 
-Szczegóły: `context/project-overview.md`.
+Próg wynosił 2 i został podniesiony po zmierzeniu (2026-08-11). Przy dokładnie dwóch cechach
+obiekt przenoszony ma **wymuszone wyjście** — łańcuch nie może wybrać jednostki ani się cofnąć.
+Symulator: 25 obiektów po 2 cechy kończy 20 rund w 70 % biegów, po 3 cechy w 100 %.
+
+Szczegóły: `context/project-overview.md`. Pomiar: `src/lib/game/simulate.test.ts`.

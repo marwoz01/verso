@@ -42,8 +42,14 @@ To rozwiązuje konflikt, którego nie da się obejść inaczej: klasyczny Higher
 ciągłość jednostką, więc zostawienie obiektu zamyka kolejne rundy w tej samej kategorii.
 Przeniesienie ciągłości na obiekt daje drabinę **i** zmianę jednostki co rundę.
 
-**Konsekwencja dla danych:** każdy obiekt musi mieć minimum 2 cechy w minimum 2 różnych
-jednostkach — raz występuje jako zakryty pretendent, raz jako odsłonięty punkt odniesienia.
+**Konsekwencja dla danych:** każdy obiekt musi mieć minimum **3 cechy w minimum 3 różnych
+jednostkach** — raz występuje jako zakryty pretendent, raz jako odsłonięty punkt odniesienia,
+a trzecia cecha daje silnikowi wybór, którą jednostką wyjść.
+
+Dwie cechy wystarczają do rozegrania rundy, ale nie do prowadzenia łańcucha: przy dokładnie
+dwóch jednostka następnej rundy jest wymuszona i przy pierwszym zakleszczeniu nie ma planu B.
+Trzecia cecha zamienia ścieżkę w wyszukiwanie — i dopiero ona pozwala silnikowi pilnować
+różnorodności jednostek. Zmierzone w `src/lib/game/simulate.test.ts`.
 
 ## Jednostki
 

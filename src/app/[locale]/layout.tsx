@@ -15,6 +15,8 @@ const dmSans = DM_Sans({
 const bigShoulders = Big_Shoulders({
   variable: "--font-big-shoulders",
   subsets: ["latin", "latin-ext"],
+  fallback: ["Arial Narrow", "Helvetica Neue", "sans-serif"],
+  adjustFontFallback: false,
 });
 
 export function generateStaticParams() {

@@ -121,13 +121,107 @@ Nic nie jest w połowie.
 
 ## Następne kroki
 
-1. **Zestaw startowy obiektów** — 40–60 pozycji z cechami w min. 2 jednostkach, wartościami
-   w jednostkach bazowych i źródłami. Blokuje wszystko poniżej: bez danych nie da się ani
-   przetestować mechaniki, ani zbudować ekranu.
-2. **Silnik doboru par + test łańcucha** — czysty TypeScript w `src/lib/`, bez Reacta.
-   Test „czy łańcuch przechodzi 20 rund na realnych danych" rozstrzyga główne ryzyko konceptu.
-3. **Pierwszy ekran pojedynku** — dopiero gdy 1 i 2 działają. Wtedy też wymieniamy domyślną
-   stronę z `create-next-app` i ustalamy tokeny motywu.
+1. **Zestaw startowy obiektów — 40 pozycji po 3 cechy (120 zweryfikowanych wartości).**
+   Liczba pochodzi z symulatora, nie z szacunku. Tryb pracy: AI proponuje obiekt, cechy,
+   wartości i konkretne linki → plik roboczy poza `src/data/` → człowiek otwiera link
+   i potwierdza liczbę → dopiero wtedy wpis wchodzi do repo. Małymi partiami, bo przy
+   200 wiarygodnie wyglądających wpisach naraz review zamienia się w przyklepywanie.
+2. **Taksonomia dziedzin** — `src/lib/domains.ts` ma dziś listę roboczą. Domknąć ją przy
+   pierwszej partii obiektów, na realnych przypadkach, nie z góry.
+3. **Przemierzyć symulator na prawdziwej bazie.** Liczby z syntetycznej są **górnym
+   ograniczeniem** — patrz „Znane luki".
+4. **Pierwszy ekran pojedynku** — `playChain` zwraca gotową listę rund, więc widok
+   ma już z czego rysować.
+
+- **Silnik łańcucha i pomiar zdrowia bazy** (2026-08-11). Model danych, walidacja, silnik
+  i symulator. Zero Reacta, zero I/O — `src/lib/game/`, 23 testy. Pełne uzasadnienie decyzji
+  w sekcji „Decyzje z sesji grill-me" poniżej.
+  - **Główne ryzyko konceptu rozstrzygnięte.** „Czy łańcuch przetrwa 20 rund" wisiało
+    nierozstrzygnięte od 2026-08-07. Odpowiedź: **tak, i to wcześniej, niż zakładaliśmy.**
+    Symulator na bazie syntetycznej, 400 biegów na konfigurację:
+
+    ```
+    cech  obiektow  wartosci  pelnych 20 rund  bez rozluznien
+      2      25        50          70%             29%
+      2      40        80          99%             92%
+      3      25        75         100%             90%
+      3      40       120         100%            100%
+      4      25       100         100%            100%
+    ```
+
+  - **Cechy ważą więcej niż obiekty — zmierzone, nie założone.** 25 obiektów po 3 cechy
+    (75 wartości) bije 40 obiektów po 2 cechy (80 wartości): mniej pracy kuratorskiej,
+    lepszy wynik. Stąd podniesienie progu z 2 na 3 cechy. Ta zależność jest **zakodowana
+    w teście** (`cechy waza wiecej niz obiekty`), więc powrót do progu 2 wywali suite.
+  - **Cel dla pierwszej bazy: 40 obiektów po 3 cechy.** Pierwsza konfiguracja ze 100 %
+    pełnych biegów i 100 % bez rozluźnień, z zapasem na to, że realne dane będą gorsze
+    od syntetycznych.
+  - **Drabina rozluźnień ma 4 poziomy, nie 5.** Plan zakładał, że pierwszym rozluźnieniem
+    jest zdjęcie preferencji dziedziny — to był błąd logiczny. Dziedzina jest **wyłącznie
+    sortowaniem**, nigdy filtrem, więc jej zdjęcie nie może odblokować pustego wyniku.
+    Realne filtry są dwa (powtórki, pasmo wartości), co daje 4 sensowne kombinacje.
+  - **Różnorodność jednostek przez karę za świeżość.** Rdzeń gwarantuje tylko, że sąsiednie
+    rundy mają różne jednostki — bez kary silnik oscylowałby między gęstymi `money`
+    i `length`. Wynik: mediana 6 z 7 jednostek w 20 rundach, dominacja 25–30 %.
+
+- **Ekran pojedynku na danych podglądowych** (2026-08-11). `/[locale]/play`, przycisk
+  „Endless" ze strony głównej prowadzi już do gry. Cel: móc **zobaczyć i kliknąć** mechanikę,
+  zanim baza zostanie zweryfikowana.
+  - **`src/lib/game/preview-unverified.ts` to rusztowanie, nie baza.** 10 obiektów z partii 01,
+    wartości **niezweryfikowane** — nazwa pliku i baner na ekranie mówią to wprost. Znika
+    w chwili, gdy powstanie `src/data/objects/`.
+  - **`src/lib/game/format.ts`** — jednostki bazowe na czytelne. Wielkości rzędu miliona idą
+    przez `Intl.NumberFormat` z `notation: "compact"`, więc „mld" / „B" biorą się z locale
+    i nie trzeba ich tłumaczyć. Ręcznie tłumaczone są tylko jednostki czasu.
+  - **Wskaźnik rozluźnienia widoczny na ekranie.** Bez niego nie da się ocenić, czy dobór par
+    działa, czy tylko udaje — przy 10 obiektach schodzi po drabinie często i to jest poprawne
+    zachowanie, nie usterka.
+  - **Mediana łańcucha na danych podglądowych: 10 rund**, 6 z 7 jednostek, dominacja 27 %,
+    żadna jednostka nie głoduje. Zgodne z oczekiwaniem przy 10 obiektach — łańcuch bez
+    powtórek nie przekroczy ich liczby.
+  - **Pułapka React 19:** `setState` w efekcie do wylosowania ziarna wywala
+    `react-hooks/set-state-in-effect`. Bramka hydratacji stoi na `useSyncExternalStore`
+    (`() => true` na kliencie, `() => false` na serwerze) — ziarno losuje się wtedy w lazy
+    initializerze `useState`, a serwer i klient renderują to samo do czasu hydratacji.
+  - **Big Shoulders nie ma metryk zastępczych w Next 16** — build ostrzegał i pomijał
+    generowanie fontu zastępczego, co przy nagłówku 128 px daje widoczny skok układu.
+    Ustawione jawnie: `fallback` na kroje wąskie + `adjustFontFallback: false`.
+
+## Decyzje z sesji grill-me (2026-08-11)
+
+Punktem wyjścia były trzy propozycje właściciela. Wszystkie trzy odpadły po weryfikacji,
+ale każda wskazała realny problem — i to te problemy rozstrzygnęliśmy.
+
+- **Clerk na dane — odrzucone.** Clerk to uwierzytelnianie, nie magazyn; a konta są poza
+  zakresem v1. Zostaje decyzja z `architecture-context.md`: pliki TS w repo. Powód: baza jest
+  tylko do odczytu, rośnie ręcznie i wymaga review przed wejściem, bo każda liczba musi być
+  prawdziwa. Git daje diff, historię i cofnięcie; baza danych żadnej z tych rzeczy bez
+  dobudowania.
+- **Model AI w runtime — odrzucone.** Rozbija trzy filary naraz: Daily wymaga determinizmu,
+  runda ma trwać kilka sekund, a gra stoi na prawdziwości liczb. AI idzie do **tworzenia**
+  bazy, gdzie zamienia research w weryfikację, a bramka człowieka zostaje.
+- **Baza wektorowa — odrzucone.** Zarabia na siebie od ~100 tys. wektorów; baza kuratorowana
+  ręcznie nigdy tyle nie urośnie. Ale **dystans semantyczny jest prawdziwym problemem** —
+  „compare the incomparable" to dosłownie pytanie o odległość dziedzin. Rozwiązany tagami.
+- **Dystans jako preferencja, nigdy jako twardy filtr.** Silnik i tak spełnia trzy warunki
+  naraz; czwarty twardy zagłodziłby łańcuch przy małej bazie. Jako sortowanie nigdy nie
+  zagłodzi. Ta sama zasada obowiązuje przy różnorodności jednostek.
+- **Embeddingi odłożone, nie odrzucone.** Warunek wejścia: baza na tyle duża, że wybór
+  realnie istnieje — przy 40 obiektach i trzech warunkach często jest jeden kandydat albo
+  zero, a precyzyjna miara odległości nie ma wtedy czego rozstrzygać. Gdy przyjdzie czas:
+  macierz dystansów liczona offline i zapisana kwantyzowana, bez bazy wektorowej.
+- **Daily = ziarno z daty, bez serwera.** Patrz korekta w `architecture-context.md`.
+- **Pasmo wartości: próg dolny, hojny sufit.** Odwrotnie niż w klasycznym Higher/Lower.
+  Tam gracz zna dziedzinę, więc bliskość wartości robi trudność. W Verso niepewność jest
+  wysoka już na starcie, bo obiekty są z odległych dziedzin — zbliżanie wartości zamienia
+  rundę w rzut monetą, a to w grze do pierwszego błędu kończy bieg bez winy gracza.
+  Próg dolny broni przy okazji przed niepewnością źródeł: przy różnicy 8 % i błędzie
+  pomiaru 5 % „poprawna" odpowiedź bywa faktycznie błędna.
+- **Bez krzywej progresji trudności.** Nie da się jej nastroić przed pierwszym graniem.
+  `MIN_RATIO`, `MAX_RATIO` i waga kary za świeżość to stałe w `candidates.ts`.
+- **Zmienność wartości jako trzecie pole przy źródle.** Data mówi „wpis ma 14 miesięcy",
+  ale nie mówi, czy to problem. Bez tego rozróżnienia zostaje odświeżanie wszystkiego
+  albo niczego.
 
 ## Znane luki / świadome długi
 
@@ -147,14 +241,25 @@ Nic nie jest w połowie.
 - **Brak kontroli wersji.** `create-next-app` uruchomiony z `--disable-git`, repozytorium nie
   jest zainicjowane. Warto to zrobić przed pierwszą większą zmianą — dziś każde skasowanie
   pliku jest nieodwracalne.
-- **Nie wiadomo, czy łańcuch utrzyma się przez dłuższą sesję.** Każdy krok wymaga obiektu,
-  który ma cechę w jednostce poprzednika, jeszcze nie wystąpił i daje sensowną różnicę wartości.
-  Trzy warunki naraz przy małej bazie mogą być nie do spełnienia. To główne ryzyko konceptu —
-  rozstrzyga je punkt 2 w „Następnych krokach".
+- **Liczby symulatora są górnym ograniczeniem, nie obietnicą.** Baza syntetyczna zakłada
+  wartości rozłożone logarytmicznie w każdej jednostce i dostępność jednostek według wag
+  z `fixtures.ts` — obie założone przeze mnie, obie optymistyczne. Prawdziwe obiekty
+  **klastrują się**: budynki i statki tłoczą się w zakresie 10–1000 m, więc próg dolny
+  odetnie ich więcej, niż widać w symulacji. Wniosek „koncept nie jest strukturalnie zepsuty
+  i cechy ważą więcej niż obiekty" jest solidny; liczba „40 obiektów wystarczy" wymaga
+  przemierzenia na realnej bazie i może urosnąć.
+- **`speed` i `area` to wąskie gardło.** Wagi dostępności w `fixtures.ts` dają im 1 i 2
+  wobec 5 dla `money` i `length`, bo niewielu obiektom da się sensownie przypisać prędkość.
+  Kara za świeżość celowo pcha silnik w te jednostki, czyli dokładnie tam, gdzie najłatwiej
+  o zakleszczenie. Przy kuracji bazy warto dosypywać obiekty z prędkością i powierzchnią
+  ponad proporcję.
 - **Grafiki obiektów abstrakcyjnych** („czas istnienia ZSRR", „PKB Polski") to nierozwiązany
   problem projektowy, nie drobiazg — dotyczy sporej części bazy. Patrz `ui-context.md`.
-- **Źródła wartości nieokreślone.** Bez nich każda liczba w bazie jest nieweryfikowalna,
-  a gra opiera się na tym, że liczby są prawdziwe.
+- **Baza obiektów jest pusta.** Silnik i walidacja stoją, ale `src/data/objects/` nie istnieje —
+  testy silnika biegną wyłącznie na danych syntetycznych. Do pierwszej rozgrywki brakuje
+  120 zweryfikowanych wartości.
+- **Kształt źródła ustalony, dobór źródeł nie.** Model wymusza URL, datę i zmienność, ale nie
+  mówi, które źródła uznajemy za wiarygodne. Do rozstrzygnięcia przy pierwszej partii.
 - **Dwujęzyczność nierozstrzygnięta.** `<html lang="en">` zostaje do czasu decyzji, żeby nie
   zmieniać tego dwa razy.
 
